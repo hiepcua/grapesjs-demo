@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Homepage</title>
+	<link href="/stylesheets/style.css" rel="stylesheet" type="text/css">
+	<link href="/stylesheets/grapes.min.css" rel="stylesheet">
+	<script src="//unpkg.com/grapesjs"></script>
+</head>
+<body>
+	<div id="gjs">
+		<h1>Hello World Component!</h1>
+	</div>
+	<div id="blocks"></div>
+	<script type="text/javascript">
+		const editor = grapesjs.init({
+			// Indicate where to init the editor. You can also pass an HTMLElement
+			container: '#gjs',
+			// Get the content for the canvas directly from the element
+			// As an alternative we could use: `components: '<h1>Hello World Component!</h1>'`,
+			fromElement: true,
+			plugins: ['grapesjs-plugin-export'],
+			pluginsOpts: {
+				'grapesjs-plugin-export': { /* options */ }
+			},
+			// Size of the editor
+			height: '600px',
+			width: 'auto',
+			// Disable the storage manager for the moment
+			storageManager: false,
+			// Avoid any default panel
+			// panels: { defaults: [] },
+			blockManager: {
+				blocks: [],
+			},
+			richTextEditor: {}
+		});
+
+		const blockManager = editor.BlockManager;
+		const panelManager = editor.Panels;
+		const rte = editor.RichTextEditor;
+		const um = editor.UndoManager;
+
+		// var panels = panelManager.getPanels();
+		// console.log(panels);
+
+		var newButton = panelManager.addButton('devices-c',{
+			id: 'myNewButton',
+			className: 'someClass',
+			command: 'someCommand',
+			attributes: { title: 'Some title'},
+			active: false,
+		});
+
+		blockManager.add('the-row-block', {
+			label: '2 Columns',
+			content: '<div class="row" data-gjs-droppable=".row-cell" data-gjs-custom-name="Row">' +
+			'<div class="row-cell" data-gjs-draggable=".row"></div>' +
+			'<div class="row-cell" data-gjs-draggable=".row"></div>' +
+			'</div>',
+		});
+
+		blockManager.add('section', {
+			label: 'section',
+			content: '<section>Put your content here</section>',
+			category: 'Blocks',
+			attributes: {
+				class:'gjs-block-section'
+			}
+		});
+		blockManager.add('div', {
+			label: 'div',
+			content: '<div>Put your content here</div>',
+			category: 'Blocks',
+			attributes: {
+				class:'gjs-block-div'
+			}
+		});
+		blockManager.add('Text', {
+			label: 'Text',
+			content: '<div>Insert your text here</div>',
+			category: 'Blocks',
+			attributes: {
+				class:'gjs-fonts gjs-f-text'
+			}
+		});
+		blockManager.add('image', {
+			label: 'Image',
+			select: true,
+			content: { type: 'image' },
+			category: 'Blocks',
+			attributes: {
+				class:'gjs-fonts gjs-f-image',
+				title: 'Image',
+			},
+			activate: true,
+		});
+
+		rte.add('insertText', {
+			name: 'insertText',
+			icon: '<i class="fa fa-paste"></i>',
+			content: '',
+			attributes: {title: 'PasteAsPlainText', "data-tooltip": 'PasteAsPlainText'},
+			result: rte => {
+				rte.exec('insertText',  prompt(common))
+			}
+		});
+		rte.add('bold', {
+			icon: '<b>B</b>',
+			attributes: {title: 'Bold'},
+			result: rte => rte.exec('bold')
+		});
+		// rte.add('link', {
+		// 	icon: document.getElementById('t'),
+		// 	attributes: {title: 'Link',},
+		// 	// Example on it's easy to wrap a selected content
+		// 	result: rte => rte.insertHTML(`<a href="#">${rte.selection()}</a>`)
+		// });
+
+		um.undo();
+		um.redo();
+
+
+		function addTagsInRichTextEditor(grapesEditor, actionName, iconHtml) {
+			var rte = grapesEditor.RichTextEditor;
+			rte.pfx = "gjs-rte-" + actionName;
+			var action = rte.get(actionName);
+			rte.add(actionName, {
+				icon: iconHtml,
+
+				// Bind the 'result' on 'change' listener
+				event: 'change',
+				//result: (rte, action) => rte.insertHTML(action.btn.firstChild.value),
+				result: function(rte, action) {
+					var button = action.btn;
+					var buttonChild = button.firstChild;
+					var value = buttonChild.value;
+					rte.insertHTML(value);
+				},
+				  
+				// Reset the select on change
+				//update: (rte, action) => { action.btn.firstChild.value = "";}
+				update: function(rte, action) { 
+					var button = action.btn;
+					var buttonChild = button.firstChild;
+					buttonChild.value = "";
+				}
+			});
+		}
+	</script>
+</body>
+</html>
